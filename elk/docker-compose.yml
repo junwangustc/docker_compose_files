@@ -1,0 +1,39 @@
+version: '2'
+services:
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:5.5.1
+        environment:
+           - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        volumes:
+           - $PWD/elasticsearch/data:/usr/share/elasticsearch/data
+        container_name: elasticsearch551
+        hostname: elasticsearch
+        restart: always
+        ports:
+           - "9200:9200"
+           - "9300:9300"
+    kibana:
+        image: docker.elastic.co/kibana/kibana:5.5.1
+        environment:
+           - ELASTICSEARCH_URL=http://elasticsearch:9200
+        container_name: kibana551
+        hostname: kibana
+        depends_on:
+           - elasticsearch
+        restart: always
+        ports:
+           - "5601:5601"
+    logstash:
+        image: docker.elastic.co/logstash/logstash:5.5.1
+        command: logstash -f /etc/logstash/conf.d/logstash.conf
+        volumes:
+           - $PWD/logstash/conf.d:/etc/logstash/conf.d
+           - $PWD/log:/tmp
+        container_name: logstash551
+        hostname: logstash
+        restart: always
+        depends_on:
+           - elasticsearch
+        ports:
+           - "7001-7005:7001-7005"
+           - "4567:4567"
